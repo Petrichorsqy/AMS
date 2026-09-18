@@ -1,0 +1,85 @@
+/*     structures.h ―― 考勤系统数据结构和常量定义     */
+
+#ifndef STRUCTURES_H
+#define STRUCTURES_H
+
+// 系统常量定义（与已有代码完全一致）
+#define MAX_RECORDS 10000       // 最大记录数量
+#define MAX_EMPLOYEE_ID 20      // 员工ID最大长度
+#define MAX_REMARK 100          // 备注最大长度
+
+// 考勤状态枚举（与已有代码完全一致）
+typedef enum {
+    NORMAL = 0,          // 正常出勤
+    LATE = 1,            // 迟到
+    LEAVE_EARLY = 2,     // 早退
+    WORK_OVERTIME = 3,   // 加班
+    EVECTION = 4,        // 出差
+    ASK_FOR_LEAVE = 5,   // 请假
+    ABSENT = 6,          // 缺勤
+} AttendanceStatus;
+
+// 考勤记录结构体（与已有代码完全一致）
+typedef struct {
+    // 员工基本信息
+    char ID[MAX_EMPLOYEE_ID];          // 员工ID
+    char name[MAX_EMPLOYEE_ID];        // 员工姓名
+
+    // 考勤信息
+    AttendanceStatus attendance_status; // 考勤状态
+    char check_in[6];                  // 上班打卡时间
+    char check_out[6];                 // 下班打卡时间
+    float work_hours;                  // 工作小时数
+    float overwork_hours;              // 加班小时数
+
+    // 系统信息
+    char data[11];                     // 考勤日期
+    char create_time[20];              // 记录创建时间
+} AttendanceRecord;
+
+// 员工月度统计结构体（实际使用的结构）
+typedef struct {
+    char id[MAX_EMPLOYEE_ID];          // 员工ID
+    char name[MAX_EMPLOYEE_ID];        // 员工姓名
+    int work_days;                     // 工作天数
+    int late_count;                    // 迟到次数
+    int early_count;                   // 早退次数
+    int overtime_count;                // 加班次数
+    int leave_count;                   // 请假次数
+    int absent_count;                  // 缺勤次数
+    float total_work_hours;            // 总工作时间
+    float total_overtime_hours;        // 总加班时间
+} MonthlyStats;
+
+// 员工异常统计结构体（实际使用的结构）
+typedef struct {
+    char id[MAX_EMPLOYEE_ID];          // 员工ID
+    char name[MAX_EMPLOYEE_ID];        // 员工姓名
+    int late_count;                    // 迟到次数
+    int early_count;                   // 早退次数
+    int absent_count;                  // 缺勤次数
+} EmployeeAbnormal;
+
+// 系统信息结构体（实际使用的结构）
+typedef struct {
+    int is_initialized;                // 是否已初始化
+    int total_records;                 // 总记录数
+    int memory_usage_kb;               // 内存使用量（KB）
+    int uptime_seconds;                // 运行时间（秒）
+    char last_operation[50];           // 最后操作
+    time_t last_save_time;             // 最后保存时间
+    int error_count;                   // 错误计数
+    int warning_count;                 // 警告计数
+} SystemStatus;
+
+// 文件操作结果结构体（实际使用的结构）
+typedef struct {
+    int success;                       // 是否成功
+    int records_processed;             // 处理的记录数
+    char message[256];                 // 操作结果消息
+    char filename[256];                // 文件名
+    long file_size;                    // 文件大小
+    time_t operation_time;             // 操作时间
+} FileOperationResult;
+
+#endif /* STRUCTURES_H */

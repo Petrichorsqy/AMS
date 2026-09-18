@@ -1,0 +1,275 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\menu_system.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:src\\menu_system.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:src\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\data_manager.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:src\\data_manager.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C5E7D4A0-0000-4F00-8000-000000000001}|tests\\Tests.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\test_suite.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C5E7D4A0-0000-4F00-8000-000000000001}|tests\\Tests.vcxproj|solutionrelative:tests\\test_suite.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\run_tests.bat||{3B902123-F8A7-4915-9F01-361F908088D0}|",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:tests\\run_tests.bat||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\utils.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:src\\utils.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\file_operations.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:src\\file_operations.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\file_operations.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:include\\file_operations.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\data_manager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:include\\data_manager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C5E7D4A0-0000-4F00-8000-000000000001}|tests\\Tests.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\structures.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C5E7D4A0-0000-4F00-8000-000000000001}|tests\\Tests.vcxproj|solutionrelative:include\\structures.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\menu_system.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:include\\menu_system.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\convert_to_utf8.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}|",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:convert_to_utf8.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:include\\utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:tests\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\run_utf8.bat||{3B902123-F8A7-4915-9F01-361F908088D0}|",
+      "RelativeMoniker": "D:0:0:{C2F11FF1-303F-4DCF-BB51-58196FFAC80F}|AttendanceSystem.vcxproj|solutionrelative:run_utf8.bat||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "main.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\main.c",
+              "RelativeDocumentMoniker": "src\\main.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\main.c",
+              "RelativeToolTip": "src\\main.c",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAWwBEAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-15T06:48:42.504Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "test_suite.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\test_suite.c",
+              "RelativeDocumentMoniker": "tests\\test_suite.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\test_suite.c",
+              "RelativeToolTip": "tests\\test_suite.c",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHYAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-17T06:25:27.196Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "run_tests.bat",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\run_tests.bat",
+              "RelativeDocumentMoniker": "tests\\run_tests.bat",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\run_tests.bat",
+              "RelativeToolTip": "tests\\run_tests.bat",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH/SURBVEhL7dU/aBNhHMbxby5pgjo6WK1DaGOJ8Q8qFmxBWnGxaqk4OIriWBChKTEBFam0SkEdRByEDp3VRYqKDoJSMCpW0VoaTawWXJNo7tL7XV6XKvY1ryUYB8HPcvB7n/ee9ziOg79JKaWP/j2\u002BZGIgCyqsL9SHL2fV4\u002Bb7eg5UvYIK\u002B5KJuDo7OPRTvH7OnEph6UOdKx73Hj3lzsMnuCL68pKMBSWnzJuZHNPvZ3FsB8dxyGQ/8Tg9ydeSrceNjAWTUxkyH\u002BbI5D7iiiAivHo7w\u002BzcZ569nNLjRsaCWCSM5QMRj\u002B6uHXTvakcWijZFI3rcyFiglMK2HTwRlFIopRAR/BZUVEWPGxkLXk\u002B/Wzixy83xB9y4fR9PhJJtM5F\u002BoceNjAVbNrSyZtVKNkZbEHERzyW6rplYawudHW163MhYsGL5Mjrbt7M\u002B0ozfsghYFts2x\u002Bho28rV0TGGL13Rt1QV0Ae6YLCBw4d6Abg1fpeJ9HOKxSLiztPXn2B3104O9uzXt/1gfIJqQqEQhUKBc6kBhk\u002BnyOfzKO/3L7ymAm/exZ0vo1QFpSq45TKyxNddU0FFeTT4/RyPn6TvRJxgwM\u002BXYkGPLVJTQe/ePVy7PELT6kbWNjUyNnqdY0eP6LFFair4bmRokIsXzuvjqnzJRH8WfH/8T6hO5fTJf7/4Bn2yzOdgnYQEAAAAAElFTkSuQmCC",
+              "WhenOpened": "2025-12-17T06:04:01.033Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\README.md",
+              "RelativeDocumentMoniker": "tests\\README.md",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\tests\\README.md",
+              "RelativeToolTip": "tests\\README.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-17T06:03:47.408Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "menu_system.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\menu_system.c",
+              "RelativeDocumentMoniker": "src\\menu_system.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\menu_system.c",
+              "RelativeToolTip": "src\\menu_system.c",
+              "ViewState": "AgIAAM0BAAAAAAAAAAAAAL8EAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-15T07:44:30.257Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "structures.h",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\structures.h",
+              "RelativeDocumentMoniker": "include\\structures.h",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\structures.h",
+              "RelativeToolTip": "include\\structures.h",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAAABIAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-15T07:08:41.103Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "utils.h",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\utils.h",
+              "RelativeDocumentMoniker": "include\\utils.h",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\utils.h",
+              "RelativeToolTip": "include\\utils.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-16T13:40:47.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "data_manager.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\data_manager.c",
+              "RelativeDocumentMoniker": "src\\data_manager.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\data_manager.c",
+              "RelativeToolTip": "src\\data_manager.c",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAWwBMAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-15T07:44:35.391Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "utils.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\utils.c",
+              "RelativeDocumentMoniker": "src\\utils.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\utils.c",
+              "RelativeToolTip": "src\\utils.c",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAWwG4AAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-15T07:44:44.47Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "file_operations.c",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\file_operations.c",
+              "RelativeDocumentMoniker": "src\\file_operations.c",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\src\\file_operations.c",
+              "RelativeToolTip": "src\\file_operations.c",
+              "ViewState": "AgIAAK4AAAAAAAAAAAAWwJQAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-12-15T07:44:32.907Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "menu_system.h",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\menu_system.h",
+              "RelativeDocumentMoniker": "include\\menu_system.h",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\menu_system.h",
+              "RelativeToolTip": "include\\menu_system.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-15T07:45:38.454Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "data_manager.h",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\data_manager.h",
+              "RelativeDocumentMoniker": "include\\data_manager.h",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\data_manager.h",
+              "RelativeToolTip": "include\\data_manager.h",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-16T13:40:23.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "convert_to_utf8.ps1",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\convert_to_utf8.ps1",
+              "RelativeDocumentMoniker": "convert_to_utf8.ps1",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\convert_to_utf8.ps1",
+              "RelativeToolTip": "convert_to_utf8.ps1",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-12-17T03:10:09.823Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "file_operations.h",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\file_operations.h",
+              "RelativeDocumentMoniker": "include\\file_operations.h",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\include\\file_operations.h",
+              "RelativeToolTip": "include\\file_operations.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-12-16T13:40:11.474Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "run_utf8.bat",
+              "DocumentMoniker": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\run_utf8.bat",
+              "RelativeDocumentMoniker": "run_utf8.bat",
+              "ToolTip": "C:\\Users\\\u8BED\\Desktop\\Backup\\AttendanceSystem\\run_utf8.bat",
+              "RelativeToolTip": "run_utf8.bat",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH/SURBVEhL7dU/aBNhHMbxby5pgjo6WK1DaGOJ8Q8qFmxBWnGxaqk4OIriWBChKTEBFam0SkEdRByEDp3VRYqKDoJSMCpW0VoaTawWXJNo7tL7XV6XKvY1ryUYB8HPcvB7n/ee9ziOg79JKaWP/j2\u002BZGIgCyqsL9SHL2fV4\u002Bb7eg5UvYIK\u002B5KJuDo7OPRTvH7OnEph6UOdKx73Hj3lzsMnuCL68pKMBSWnzJuZHNPvZ3FsB8dxyGQ/8Tg9ydeSrceNjAWTUxkyH\u002BbI5D7iiiAivHo7w\u002BzcZ569nNLjRsaCWCSM5QMRj\u002B6uHXTvakcWijZFI3rcyFiglMK2HTwRlFIopRAR/BZUVEWPGxkLXk\u002B/Wzixy83xB9y4fR9PhJJtM5F\u002BoceNjAVbNrSyZtVKNkZbEHERzyW6rplYawudHW163MhYsGL5Mjrbt7M\u002B0ozfsghYFts2x\u002Bho28rV0TGGL13Rt1QV0Ae6YLCBw4d6Abg1fpeJ9HOKxSLiztPXn2B3104O9uzXt/1gfIJqQqEQhUKBc6kBhk\u002BnyOfzKO/3L7ymAm/exZ0vo1QFpSq45TKyxNddU0FFeTT4/RyPn6TvRJxgwM\u002BXYkGPLVJTQe/ePVy7PELT6kbWNjUyNnqdY0eP6LFFair4bmRokIsXzuvjqnzJRH8WfH/8T6hO5fTJf7/4Bn2yzOdgnYQEAAAAAElFTkSuQmCC",
+              "WhenOpened": "2025-12-17T02:39:20.887Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

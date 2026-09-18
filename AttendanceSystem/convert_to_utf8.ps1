@@ -1,0 +1,23 @@
+# convert_to_utf8.ps1
+# Backup and convert all .c and .h files under current directory to UTF-8
+# Usage: Open PowerShell in project root and run: .\convert_to_utf8.ps1
+
+$encDefault = [System.Text.Encoding]::Default
+$encUtf8 = [System.Text.Encoding]::UTF8
+
+Get-ChildItem -Recurse -Include *.c,*.h | ForEach-Object {
+    $path = $_.FullName
+    try {
+        $bak = "$path.bak"
+        Copy-Item -Path $path -Destination $bak -Force
+        Write-Host "Backed up $path -> $bak"
+        $content = Get-Content -Raw -Encoding Default -Path $path
+        [System.IO.File]::WriteAllText($path, $content, $encUtf8)
+        Write-Host "Converted to UTF-8: $path"
+    }
+    catch {
+        Write-Host ("Failed to convert " + $path + ": " + $_.Exception.Message) -ForegroundColor Red
+    }
+}
+
+Write-Host "Conversion complete. Backups use .bak extension."

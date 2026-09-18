@@ -1,0 +1,8 @@
+﻿  data_manager.c
+  file_operations.c
+  main.c
+  menu_system.c
+  utils.c
+C:\Users\语\Desktop\Backup\AttendanceSystem\src\utils.c(601,29): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  正在生成代码...
+  AttendanceSystem.vcxproj -> C:\Users\语\Desktop\Backup\AttendanceSystem\x64\Debug\AttendanceSystem.exe

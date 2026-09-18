@@ -1,0 +1,32 @@
+﻿#ifndef UTILS_H
+#define UTILS_H
+
+#include "structures.h"
+
+// 工具函数声明
+const char* get_status_string(AttendanceStatus status);
+int get_current_datetime(char* buffer, size_t size, const char* format);
+void safe_strcpy(char* dest, const char* src, size_t dest_size);
+void trim_string(char* str);
+int validate_date_string(const char* date_str);
+int validate_time_string(const char* time_str);
+int compare_dates(const char* date1, const char* date2);
+int compare_times(const char* time1, const char* time2);
+float calculate_time_difference(const char* start_time, const char* end_time);
+int is_string_empty_or_whitespace(const char* str);
+void string_to_lower(char* str);
+void string_to_upper(char* str);
+void format_file_size(long size, char* buffer, size_t buffer_size);
+void get_file_extension(const char* filename, char* extension, size_t buffer_size);
+int file_exists(const char* filename);
+int create_directory_if_needed(const char* path);
+void show_progress_bar(int current, int total, const char* description);
+void clear_screen();
+void sleep_ms(int milliseconds);
+void flush_input_buffer(void);
+int safe_input_time(char* buffer, int size, const char* prompt);
+int safe_input_date(char* buffer, int size,const char* prompt);
+int safe_input_string(char* buffer, int size,const char* prompt);
+int safe_input_int(int min, int max, const char* prompt);
+
+#endif

@@ -1,0 +1,15 @@
+﻿#ifndef FILE_OPERATIONS_H
+#define FILE_OPERATIONS_H
+
+#include "structures.h"
+
+// 文件操作函数声明
+int save_attendance_data(AttendanceRecord records[], int count, const char* filename);
+int load_attendance_data(AttendanceRecord records[], const char* filename);
+int export_to_csv(AttendanceRecord records[], int count, const char* filename);
+int import_from_csv(AttendanceRecord records[], int* count, const char* filename);
+int backup_data_file(const char* source_filename);
+int restore_backup_file(const char* backup_filename, const char* target_filename);
+long get_file_size(const char* filename);
+
+#endif

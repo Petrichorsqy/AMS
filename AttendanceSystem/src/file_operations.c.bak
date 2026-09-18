@@ -1,0 +1,427 @@
+/**
+ * @file file_operations.c
+ * @brief 文件操作模块
+ * @details 负责考勤记录的保存、加载、导入导出等文件操作
+ */
+#ifdef _WIN32
+#include <io.h>  // Windows下使用_access()
+#define access _access
+#define F_OK 0
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "structures.h"
+#include "utils.h"
+
+ /**
+  * @brief 保存考勤记录到二进制文件
+  * @param records 考勤记录数组
+  * @param count 记录数量
+  * @param filename 文件名
+  * @return 保存成功返回1，失败返回0
+  * @details 使用二进制格式保存，提高存储效率和读取速度
+  */
+int save_attendance_data(AttendanceRecord records[], int count, const char* filename) {
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        printf("错误：无法创建文件 %s\n", filename);
+        return 0;
+    }
+
+    // 写入文件头（验证码和版本号）
+    unsigned int magic_number = 0x4154534D; // "ATSM" 的十六进制表示
+    unsigned short version = 0x0100; // 版本1.0
+
+    fwrite(&magic_number, sizeof(unsigned int), 1, file);
+    fwrite(&version, sizeof(unsigned short), 1, file);
+
+    // 写入记录数量
+    fwrite(&count, sizeof(int), 1, file);
+
+    // 写入每条记录
+    for (int i = 0; i < count; i++) {
+        fwrite(&records[i], sizeof(AttendanceRecord), 1, file);
+    }
+
+    // 写入文件尾标记
+    unsigned int end_marker = 0x454E4421; // "END!" 的十六进制表示
+    fwrite(&end_marker, sizeof(unsigned int), 1, file);
+
+    fclose(file);
+
+    // 显示保存信息
+    time_t now = time(NULL);
+    struct tm* t = localtime(&now);
+    printf("数据已保存到 %s\n", filename);
+    printf("保存时间：%04d-%02d-%02d %02d:%02d:%02d\n",
+        t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+        t->tm_hour, t->tm_min, t->tm_sec);
+    printf("保存记录数：%d\n", count);
+    printf("文件大小：%.2f KB\n",
+        (count * sizeof(AttendanceRecord) + 16) / 1024.0);
+
+    return 1;
+}
+
+/**
+ * @brief 从二进制文件加载考勤记录
+ * @param records 考勤记录数组
+ * @param filename 文件名
+ * @return 成功加载的记录数量
+ * @details 读取二进制文件，验证文件格式和完整性
+ */
+int load_attendance_data(AttendanceRecord records[], const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        printf("文件 %s 不存在或无法打开\n", filename);
+        return 0;
+    }
+
+    // 读取文件头验证
+    unsigned int magic_number;
+    unsigned short version;
+
+    if (fread(&magic_number, sizeof(unsigned int), 1, file) != 1 ||
+        fread(&version, sizeof(unsigned short), 1, file) != 1) {
+        printf("错误：文件头读取失败\n");
+        fclose(file);
+        return 0;
+    }
+
+    // 验证文件格式
+    if (magic_number != 0x4154534D) {
+        printf("错误：文件格式不正确\n");
+        fclose(file);
+        return 0;
+    }
+
+    printf("检测到考勤数据文件，版本：%d.%d\n",
+        version >> 8, version & 0xFF);
+
+    // 读取记录数量
+    int count;
+    if (fread(&count, sizeof(int), 1, file) != 1) {
+        printf("错误：读取记录数量失败\n");
+        fclose(file);
+        return 0;
+    }
+
+    // 检查记录数量是否超过限制
+    if (count > MAX_RECORDS) {
+        printf("警告：文件包含 %d 条记录，超过系统上限 %d\n", count, MAX_RECORDS);
+        count = MAX_RECORDS;
+    }
+
+    // 读取记录
+    int actual_count = 0;
+    for (int i = 0; i < count; i++) {
+        if (fread(&records[i], sizeof(AttendanceRecord), 1, file) == 1) {
+            actual_count++;
+        }
+        else {
+            printf("警告：读取第 %d 条记录时出错\n", i + 1);
+            break;
+        }
+    }
+
+    // 验证文件尾标记
+    unsigned int end_marker;
+    if (fread(&end_marker, sizeof(unsigned int), 1, file) == 1) {
+        if (end_marker != 0x454E4421) {
+            printf("警告：文件可能已损坏\n");
+        }
+    }
+
+    fclose(file);
+
+    printf("成功加载 %d 条考勤记录\n", actual_count);
+    return actual_count;
+}
+
+/**
+ * @brief 导出考勤记录到CSV文件
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param filename 输出文件名
+ * @return 导出成功返回1，失败返回0
+ * @details 生成CSV格式文件，便于Excel等软件处理
+ */
+int export_to_csv(AttendanceRecord records[], int count, const char* filename) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("错误：无法创建文件 %s\n", filename);
+        return 0;
+    }
+
+    // 写入CSV文件头
+    fprintf(file, "序号,员工ID,员工姓名,考勤日期,考勤状态,上班时间,下班时间,工作小时,加班小时,创建时间\n");
+
+    // 写入每条记录
+    for (int i = 0; i < count; i++) {
+        const char* status_str;
+        switch (records[i].attendance_status) {
+        case NORMAL: status_str = "正常出勤"; break;
+        case LATE: status_str = "迟到"; break;
+        case LEAVE_EARLY: status_str = "早退"; break;
+        case WORK_OVERTIME: status_str = "加班"; break;
+        case EVECTION: status_str = "出差"; break;
+        case ASK_FOR_LEAVE: status_str = "请假"; break;
+        case ABSENT: status_str = "缺勤"; break;
+        default: status_str = "未知";
+        }
+
+        fprintf(file, "%d,%s,%s,%s,%s,%s,%s,%.2f,%.2f,%s\n",
+            i + 1,
+            records[i].ID,
+            records[i].name,
+            records[i].data,
+            status_str,
+            records[i].check_in,
+            records[i].check_out,
+            records[i].work_hours,
+            records[i].overwork_hours,
+            records[i].create_time);
+    }
+
+    fclose(file);
+
+    printf("数据已导出到CSV文件：%s\n", filename);
+    printf("导出记录数：%d\n", count);
+
+    return 1;
+}
+
+/**
+ * @brief 从CSV文件导入考勤记录
+ * @param records 考勤记录数组
+ * @param count 当前记录数量指针
+ * @param filename 文件名
+ * @return 成功导入的记录数量
+ * @details 从CSV文件读取数据并转换为考勤记录格式
+ */
+int import_from_csv(AttendanceRecord records[], int* count, const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("错误：无法打开文件 %s\n", filename);
+        return 0;
+    }
+
+    char line[256];
+    int import_count = 0;
+    int line_number = 0;
+
+    // 跳过CSV文件头
+    if (fgets(line, sizeof(line), file) == NULL) {
+        fclose(file);
+        return 0;
+    }
+    line_number++;
+
+    // 读取数据行
+    while (fgets(line, sizeof(line), file) != NULL) {
+        line_number++;
+
+        // 检查记录数量是否达到上限
+        if (*count + import_count >= MAX_RECORDS) {
+            printf("警告：已达到最大记录数，停止导入\n");
+            break;
+        }
+
+        // 解析CSV行
+        AttendanceRecord record;
+        memset(&record, 0, sizeof(AttendanceRecord));
+
+        char* token;
+        int field_index = 0;
+
+        // 使用逗号分割字段
+        token = strtok(line, ",");
+        while (token != NULL && field_index < 10) {
+            // 去除可能的空白字符
+            char* value = token;
+            while (*value == ' ' || *value == '\t' || *value == '\"') value++;
+            char* end = value + strlen(value) - 1;
+            while (end > value && (*end == ' ' || *end == '\t' || *end == '\"' || *end == '\n' || *end == '\r')) {
+                *end = '\0';
+                end--;
+            }
+
+            switch (field_index) {
+            case 1: // 员工ID
+                strncpy(record.ID, value, MAX_EMPLOYEE_ID - 1);
+                break;
+            case 2: // 员工姓名
+                strncpy(record.name, value, MAX_EMPLOYEE_ID - 1);
+                break;
+            case 3: // 考勤日期
+                strncpy(record.data, value, 10);
+                break;
+            case 4: // 考勤状态
+                if (strcmp(value, "正常出勤") == 0) record.attendance_status = NORMAL;
+                else if (strcmp(value, "迟到") == 0) record.attendance_status = LATE;
+                else if (strcmp(value, "早退") == 0) record.attendance_status = LEAVE_EARLY;
+                else if (strcmp(value, "加班") == 0) record.attendance_status = WORK_OVERTIME;
+                else if (strcmp(value, "出差") == 0) record.attendance_status = EVECTION;
+                else if (strcmp(value, "请假") == 0) record.attendance_status = ASK_FOR_LEAVE;
+                else if (strcmp(value, "缺勤") == 0) record.attendance_status = ABSENT;
+                break;
+            case 5: // 上班时间
+                strncpy(record.check_in, value, 5);
+                break;
+            case 6: // 下班时间
+                strncpy(record.check_out, value, 5);
+                break;
+            case 7: // 工作小时
+                record.work_hours = (float)atof(value);
+                break;
+            case 8: // 加班小时
+                record.overwork_hours = (float)atof(value);
+                break;
+            case 9: // 创建时间
+                strncpy(record.create_time, value, 19);
+                break;
+            }
+
+            field_index++;
+            token = strtok(NULL, ",");
+        }
+
+        // 如果创建时间为空，生成当前时间
+        if (strlen(record.create_time) == 0) {
+            time_t now = time(NULL);
+            struct tm* t = localtime(&now);
+            strftime(record.create_time, 20, "%Y-%m-%d %H:%M:%S", t);
+        }
+
+        // 验证必要字段
+        if (strlen(record.ID) > 0 && strlen(record.name) > 0 && strlen(record.data) > 0) {
+            records[*count + import_count] = record;
+            import_count++;
+        }
+        else {
+            printf("警告：第 %d 行数据不完整，已跳过\n", line_number);
+        }
+    }
+
+    fclose(file);
+
+    if (import_count > 0) {
+        *count += import_count;
+        printf("成功从CSV文件导入 %d 条记录\n", import_count);
+    }
+    else {
+        printf("未从CSV文件中找到有效记录\n");
+    }
+
+    return import_count;
+}
+
+/**
+ * @brief 备份数据文件
+ * @param source_filename 源文件名
+ * @return 备份成功返回1，失败返回0
+ * @details 创建带时间戳的备份文件，防止数据丢失
+ */
+int backup_data_file(const char* source_filename) {
+    // 生成备份文件名（带时间戳）
+    char backup_filename[256];
+    time_t now = time(NULL);
+    struct tm* t = localtime(&now);
+
+    snprintf(backup_filename, sizeof(backup_filename),
+        "%s.backup_%04d%02d%02d_%02d%02d%02d.dat",
+        source_filename,
+        t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+        t->tm_hour, t->tm_min, t->tm_sec);
+
+    // 复制文件
+    FILE* source_file = fopen(source_filename, "rb");
+    if (source_file == NULL) {
+        printf("错误：无法打开源文件 %s\n", source_filename);
+        return 0;
+    }
+
+    FILE* backup_file = fopen(backup_filename, "wb");
+    if (backup_file == NULL) {
+        printf("错误：无法创建备份文件 %s\n", backup_filename);
+        fclose(source_file);
+        return 0;
+    }
+
+    // 复制文件内容
+    char buffer[1024];
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), source_file)) > 0) {
+        fwrite(buffer, 1, bytes_read, backup_file);
+    }
+
+    fclose(source_file);
+    fclose(backup_file);
+
+    printf("数据备份成功：%s\n", backup_filename);
+    return 1;
+}
+
+/**
+ * @brief 恢复备份文件
+ * @param backup_filename 备份文件名
+ * @param target_filename 目标文件名
+ * @return 恢复成功返回1，失败返回0
+ */
+int restore_backup_file(const char* backup_filename, const char* target_filename) {
+    // 备份现有文件（如果存在）
+    if (_access(target_filename, F_OK) == 0) {
+        char temp_backup[256];
+        snprintf(temp_backup, sizeof(temp_backup), "%s.pre_restore", target_filename);
+        if (rename(target_filename, temp_backup) != 0) {
+            printf("警告：无法备份现有文件\n");
+        }
+    }
+
+    // 复制备份文件
+    FILE* backup_file = fopen(backup_filename, "rb");
+    if (backup_file == NULL) {
+        printf("错误：无法打开备份文件 %s\n", backup_filename);
+        return 0;
+    }
+
+    FILE* target_file = fopen(target_filename, "wb");
+    if (target_file == NULL) {
+        printf("错误：无法创建目标文件 %s\n", target_filename);
+        fclose(backup_file);
+        return 0;
+    }
+
+    // 复制文件内容
+    char buffer[1024];
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), backup_file)) > 0) {
+        fwrite(buffer, 1, bytes_read, target_file);
+    }
+
+    fclose(backup_file);
+    fclose(target_file);
+
+    printf("数据恢复成功：%s -> %s\n", backup_filename, target_filename);
+    return 1;
+}
+
+/**
+ * @brief 检查文件大小
+ * @param filename 文件名
+ * @return 文件大小（字节），文件不存在返回-1
+ */
+long get_file_size(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        return -1;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fclose(file);
+
+    return size;
+}

@@ -1,0 +1,46 @@
+#ifndef MENU_SYSTEM_H
+#define MENU_SYSTEM_H
+
+#include "structures.h"
+
+//系统操作函数声明
+void system_init();
+void system_cleanup();
+// 菜单显示函数
+void display_title();
+void display_main_menu();
+void display_about();
+void display_all_records();
+//void display_record_management_menu();
+//void display_query_statistics_menu();
+//void display_file_operations_menu();
+//void display_system_settings_menu();
+
+
+// 菜单处理函数
+int get_menu_selection(int min, int max);
+void handle_system_settings();
+void handle_data_maintenance();
+void handle_record_management();
+void handle_query_statistics();
+void handle_file_operations();
+
+// 具体操作处理函数
+void handle_query_by_name();
+void handle_query_by_date();
+void handle_query_by_status();
+void handle_query_by_time_range();
+void handle_statistics_employee();
+void handle_generate_monthly_report();
+void handle_analyze_abnormal();
+int handle_add_record(void);
+int handle_modify_record(void);
+int handle_delete_record(void);
+int handle_view_record(void);
+int handle_query_by_id(void);
+
+// 辅助函数
+void display_record_details(const AttendanceRecord* record);
+void pause_program();
+
+#endif

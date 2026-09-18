@@ -1,0 +1,1408 @@
+﻿/**
+ * @file menu_system.c
+ * @brief 菜单系统模块
+ * @details 负责用户界面显示和菜单交互
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "structures.h"
+#include "data_manager.h"
+#include "file_operations.h"
+#include "utils.h"
+#include "menu_system.h"
+ // 全局变量声明
+extern AttendanceRecord attendance_records[MAX_RECORDS];
+extern int record_count;
+extern const char* data_filename;
+
+// ... [保留已有的display_xxx函数和handle_record_management等函数] ...
+
+/**
+ * @brief 显示程序标题
+ */
+void display_title() {
+    printf("\n");
+    printf("===============================================\n");
+    printf("        考勤管理系统 v1.0\n");
+    printf("        Attendance Management System\n");
+    printf("===============================================\n");
+}
+
+/**
+ * @brief 显示主菜单
+ */
+void display_main_menu() {
+    printf("\n");
+    printf("============== 主菜单 ==============\n");
+    printf("1. 考勤记录管理\n");
+    printf("2. 数据查询统计\n");
+    printf("3. 文件操作\n");
+    printf("4. 系统设置\n");
+    printf("5. 显示所有记录\n");
+    printf("0. 退出系统\n");
+    printf("====================================\n");
+    printf("请选择操作 (0-5): ");
+}
+
+/**
+ * @brief 获取用户菜单选择
+ * @param min 最小可选值
+ * @param max 最大可选值
+ * @return 用户选择的有效值
+ */
+int get_menu_selection(int min, int max) {
+    int choice;
+    char input[20];
+
+    while (1) {
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("输入错误，请重新输入: ");
+            continue;
+        }
+
+        if (sscanf(input, "%d", &choice) == 1 && choice >= min && choice <= max) {
+            return choice;
+        }
+
+        printf("无效选择，请输入 %d 到 %d 之间的数字: ", min, max);
+    }
+}
+
+/**
+ * @brief 暂停程序等待用户按键
+ */
+void pause_program() {
+    printf("\n按Enter键继续...");
+    getchar();  // 清除之前的换行符
+    getchar();  // 等待用户按回车
+}
+
+/**
+ * @brief 显示记录详细信息
+ * @param record 要显示的记录指针
+ */
+void display_record_details(const AttendanceRecord* record) {
+    printf("员工ID: %s\n", record->ID);
+    printf("员工姓名: %s\n", record->name);
+    printf("考勤日期: %s\n", record->date);
+    printf("考勤状态: %s\n", get_status_string(record->attendance_status));
+    printf("上班时间: %s\n", record->check_in);
+    printf("下班时间: %s\n", record->check_out);
+    printf("工作小时: %.2f\n", record->work_hours);
+    printf("加班小时: %.2f\n", record->overwork_hours);
+    printf("创建时间: %s\n", record->create_time);
+}
+
+/**
+ * @brief 显示所有考勤记录
+ */
+void display_all_records() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+
+        // 添加暂停
+        printf("按任意键返回...");
+        flush_input_buffer();  // 先清空缓冲区
+        getchar();
+
+        return;
+    }
+
+    printf("\n=== 所有考勤记录 (共%d条) ===\n\n", record_count);
+
+    for (int i = 0; i < record_count; i++) {
+        printf("记录 #%d\n", i + 1);
+        display_record_details(&attendance_records[i]);
+        printf("\n");
+    }
+
+    // 关键：添加暂停，防止立即返回
+    printf("按回车键返回菜单...");
+    fflush(stdout);  // 确保输出被刷新
+
+    // 等待用户按键
+    getchar();
+}
+
+/**
+ * @brief 显示系统信息
+ */
+void display_system_info() {
+    clear_screen();
+    display_title();
+
+    printf("\n系统状态:\n");
+    printf("当前时间: ");
+    char current_time[20];
+    if (get_current_datetime(current_time, sizeof(current_time), "%Y-%m-%d %H:%M:%S")) {
+        printf("%s\n", current_time);
+    }
+    else {
+        printf("获取时间失败\n");
+    }
+
+    printf("数据文件: %s\n", data_filename);
+    printf("记录数量: %d / %d\n", record_count, MAX_RECORDS);
+
+    // 显示记录统计
+    if (record_count > 0) {
+        int status_count[7] = { 0 };
+        float total_work_hours = 0;
+        float total_overtime = 0;
+
+        for (int i = 0; i < record_count; i++) {
+            status_count[attendance_records[i].attendance_status]++;
+            total_work_hours += attendance_records[i].work_hours;
+            total_overtime += attendance_records[i].overwork_hours;
+        }
+
+        printf("\n考勤统计:\n");
+        printf("正常出勤: %d 次\n", status_count[NORMAL]);
+        printf("迟到: %d 次\n", status_count[LATE]);
+        printf("早退: %d 次\n", status_count[LEAVE_EARLY]);
+        printf("加班: %d 次\n", status_count[WORK_OVERTIME]);
+        printf("出差: %d 次\n", status_count[EVECTION]);
+        printf("请假: %d 次\n", status_count[ASK_FOR_LEAVE]);
+        printf("缺勤: %d 次\n", status_count[ABSENT]);
+        printf("总工作时间: %.2f 小时\n", total_work_hours);
+        printf("总加班时间: %.2f 小时\n", total_overtime);
+    }
+
+    pause_program();
+}
+
+/**
+ * @brief 显示关于信息
+ */
+void display_about() {
+    clear_screen();
+    printf("\n");
+    printf("===============================================\n");
+    printf("        考勤管理系统 v1.0\n");
+    printf("        Attendance Management System\n");
+    printf("===============================================\n");
+    printf("\n功能特点:\n");
+    printf("1. 完整的考勤记录管理\n");
+    printf("2. 多种查询和统计功能\n");
+    printf("3. 数据导入导出支持\n");
+    printf("4. 数据备份和恢复\n");
+    printf("5. 用户友好的界面\n");
+    printf("\n系统限制:\n");
+    printf("最大记录数: %d\n", MAX_RECORDS);
+    printf("员工ID最大长度: %d\n", MAX_EMPLOYEE_ID - 1);
+    printf("\n技术支持:\n");
+    printf("如有问题请联系系统管理员\n");
+    printf("\n");
+
+    pause_program();
+}
+
+/**
+ * @brief 系统初始化
+ */
+void system_init() {
+    printf("正在初始化考勤管理系统...\n");
+
+    // 初始化数据数组
+    memset(attendance_records, 0, sizeof(attendance_records));
+    record_count = 0;
+
+    // 尝试加载数据文件
+    printf("正在加载数据文件: %s\n", data_filename);
+    record_count = load_attendance_data(attendance_records, data_filename);
+
+    if (record_count > 0) {
+        printf("成功加载 %d 条考勤记录\n", record_count);
+    }
+    else {
+        printf("未找到现有数据文件，将创建新的数据文件\n");
+    }
+
+    printf("系统初始化完成\n");
+}
+
+/**
+ * @brief 退出系统前的清理工作
+ */
+void system_cleanup() {
+    printf("\n正在退出系统...\n");
+
+    // 询问是否保存数据
+    if (record_count > 0) {
+        printf("是否保存当前数据？(yes/no): ");
+        char answer[10];
+        fgets(answer, sizeof(answer), stdin);
+        answer[strcspn(answer, "\n")] = '\0';
+
+        if (strcmp(answer, "yes") == 0 || strcmp(answer, "YES") == 0) {
+            if (save_attendance_data(attendance_records, record_count, data_filename)) {
+                printf("数据保存成功\n");
+            }
+            else {
+                printf("数据保存失败\n");
+            }
+        }
+    }
+
+    printf("感谢使用考勤管理系统，再见！\n");
+}
+
+/**
+ * @brief 处理数据维护
+ */
+void handle_data_maintenance() {
+    printf("\n=== 数据维护 ===\n");
+    printf("1. 清理无效记录\n");
+    printf("2. 查找重复记录\n");
+    printf("3. 按员工ID排序\n");
+    printf("4. 按日期排序\n");
+    printf("5. 初始化数据\n");
+    printf("6. 返回\n");
+    printf("================\n");
+    printf("请选择操作 (1-6): ");
+
+    int choice = get_menu_selection(1, 6);
+
+    switch (choice) {
+    case 1:
+        clean_invalid_records(attendance_records, &record_count);
+        break;
+    case 2:
+        find_duplicate_records(attendance_records, record_count);
+        break;
+    case 3:
+        sort_records_by_id(attendance_records, record_count, 1);
+        break;
+    case 4:
+        sort_records_by_date(attendance_records, record_count, 1);
+        break;
+    case 5:
+        printf("确认初始化所有数据？(yes/no): ");
+        char confirm[10];
+        scanf("%s", confirm);
+        getchar();
+
+        if (strcmp(confirm, "yes") == 0 || strcmp(confirm, "YES") == 0) {
+            init_attendance_data(attendance_records, &record_count);
+            printf("数据初始化完成\n");
+        }
+        else {
+            printf("操作取消\n");
+        }
+        break;
+    case 6:
+        return;
+    }
+
+    pause_program();
+}
+
+/**
+ * @brief 处理按日期查询
+ */
+void handle_query_by_date() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 按日期查询 ---\n");
+    printf("请输入查询日期 (YYYY-MM-DD): ");
+
+    char date[11];
+    fgets(date, sizeof(date), stdin);
+    date[strcspn(date, "\n")] = '\0';
+
+    if (!validate_date_string(date)) {
+        printf("日期格式不正确，请输入 YYYY-MM-DD 格式\n");
+        return;
+    }
+
+    printf("\n查询结果 (日期: %s):\n", date);
+    int found = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        if (strcmp(attendance_records[i].date, date) == 0) {
+            printf("\n记录 #%d:\n", i + 1);
+            display_record_details(&attendance_records[i]);
+            found++;
+        }
+    }
+
+    if (found == 0) {
+        printf("未找到日期为 %s 的记录\n", date);
+    }
+    else {
+        printf("\n共找到 %d 条记录\n", found);
+    }
+}
+
+/**
+ * @brief 处理按考勤状态查询
+ */
+void handle_query_by_status() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 按考勤状态查询 ---\n");
+    printf("请选择考勤状态:\n");
+    printf("0-正常出勤, 1-迟到, 2-早退, 3-加班, 4-出差, 5-请假, 6-缺勤\n");
+    printf("请输入状态编号: ");
+
+    int status;
+    char input[10];
+    fgets(input, sizeof(input), stdin);
+    sscanf(input, "%d", &status);
+
+    if (status < 0 || status > 6) {
+        printf("无效的状态编号\n");
+        return;
+    }
+
+    AttendanceStatus query_status = (AttendanceStatus)status;
+    const char* status_name = get_status_string(query_status);
+
+    printf("\n查询结果 (状态: %s):\n", status_name);
+    int found = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        if (attendance_records[i].attendance_status == query_status) {
+            printf("\n记录 #%d:\n", i + 1);
+            printf("员工: %s (%s)\n", attendance_records[i].name, attendance_records[i].ID);
+            printf("日期: %s\n", attendance_records[i].date);
+            printf("上班: %s, 下班: %s\n",
+                attendance_records[i].check_in, attendance_records[i].check_out);
+            printf("工时: %.2f (加班: %.2f)\n",
+                attendance_records[i].work_hours, attendance_records[i].overwork_hours);
+            found++;
+        }
+    }
+
+    if (found == 0) {
+        printf("未找到状态为 %s 的记录\n", status_name);
+    }
+    else {
+        printf("\n共找到 %d 条记录\n", found);
+    }
+}
+
+/**
+ * @brief 处理按时间段查询
+ */
+void handle_query_by_time_range() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 按时间段查询 ---\n");
+
+    char start_date[11], end_date[11];
+
+    printf("请输入开始日期 (YYYY-MM-DD): ");
+    fgets(start_date, sizeof(start_date), stdin);
+    start_date[strcspn(start_date, "\n")] = '\0';
+
+    printf("请输入结束日期 (YYYY-MM-DD): ");
+    fgets(end_date, sizeof(end_date), stdin);
+    end_date[strcspn(end_date, "\n")] = '\0';
+
+    if (!validate_date_string(start_date) || !validate_date_string(end_date)) {
+        printf("日期格式不正确，请输入 YYYY-MM-DD 格式\n");
+        return;
+    }
+
+    if (strcmp(start_date, end_date) > 0) {
+        printf("错误：开始日期不能晚于结束日期\n");
+        return;
+    }
+
+    printf("\n查询结果 (%s 到 %s):\n", start_date, end_date);
+    int found = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        if (strcmp(attendance_records[i].date, start_date) >= 0 &&
+            strcmp(attendance_records[i].date, end_date) <= 0) {
+            printf("\n记录 #%d:\n", i + 1);
+            printf("员工: %s (%s)\n", attendance_records[i].name, attendance_records[i].ID);
+            printf("日期: %s, 状态: %s\n",
+                attendance_records[i].date,
+                get_status_string(attendance_records[i].attendance_status));
+            printf("上班: %s, 下班: %s\n",
+                attendance_records[i].check_in, attendance_records[i].check_out);
+            found++;
+        }
+    }
+
+    if (found == 0) {
+        printf("未找到在时间段 %s 到 %s 内的记录\n", start_date, end_date);
+    }
+    else {
+        printf("\n共找到 %d 条记录\n", found);
+    }
+}
+
+/**
+ * @brief 处理员工考勤统计
+ */
+void handle_statistics_employee() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 员工考勤统计 ---\n");
+    printf("请输入员工ID: ");
+
+    char employee_id[MAX_EMPLOYEE_ID];
+    fgets(employee_id, sizeof(employee_id), stdin);
+    employee_id[strcspn(employee_id, "\n")] = '\0';
+
+    // 使用正确的函数名
+    calculate_employee_statistics(attendance_records, record_count, employee_id);
+}
+
+/**
+ * @brief 处理生成月度报表
+ */
+void handle_generate_monthly_report() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 生成月度报表 ---\n");
+
+    int year, month;
+    printf("请输入年份 (YYYY): ");
+    char input[10];
+    fgets(input, sizeof(input), stdin);
+    sscanf(input, "%d", &year);
+
+    printf("请输入月份 (1-12): ");
+    fgets(input, sizeof(input), stdin);
+    sscanf(input, "%d", &month);
+
+    if (year < 2000 || year > 2100 || month < 1 || month > 12) {
+        printf("无效的年份或月份\n");
+        return;
+    }
+
+    // 统计月度数据
+    printf("\n=== %d年%02d月考勤报表 ===\n", year, month);
+
+    // 统计每个员工的数据
+    struct MonthlyStats {
+        char id[MAX_EMPLOYEE_ID];
+        char name[MAX_EMPLOYEE_ID];
+        int work_days;
+        int late_count;
+        int early_count;
+        int overtime_count;
+        int leave_count;
+        int absent_count;
+        float total_work_hours;
+        float total_overtime_hours;
+    };
+
+    struct MonthlyStats stats[100];
+    int employee_count = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        // 检查是否是目标月份
+        int record_year, record_month, record_day;
+        if (sscanf(attendance_records[i].date, "%d-%d-%d", &record_year, &record_month, &record_day) != 3) {
+            continue;
+        }
+
+        if (record_year == year && record_month == month) {
+            // 查找员工是否已在统计列表中
+            int found = 0;
+            for (int j = 0; j < employee_count; j++) {
+                if (strcmp(stats[j].id, attendance_records[i].ID) == 0) {
+                    found = 1;
+                    stats[j].work_days++;
+                    stats[j].total_work_hours += attendance_records[i].work_hours;
+                    stats[j].total_overtime_hours += attendance_records[i].overwork_hours;
+
+                    switch (attendance_records[i].attendance_status) {
+                    case LATE: stats[j].late_count++; break;
+                    case LEAVE_EARLY: stats[j].early_count++; break;
+                    case WORK_OVERTIME: stats[j].overtime_count++; break;
+                    case ASK_FOR_LEAVE: stats[j].leave_count++; break;
+                    case ABSENT: stats[j].absent_count++; break;
+                    }
+                    break;
+                }
+            }
+
+            // 新员工，添加到列表
+            if (!found && employee_count < 100) {
+                strcpy(stats[employee_count].id, attendance_records[i].ID);
+                strcpy(stats[employee_count].name, attendance_records[i].name);
+                stats[employee_count].work_days = 1;
+                stats[employee_count].late_count = 0;
+                stats[employee_count].early_count = 0;
+                stats[employee_count].overtime_count = 0;
+                stats[employee_count].leave_count = 0;
+                stats[employee_count].absent_count = 0;
+                stats[employee_count].total_work_hours = attendance_records[i].work_hours;
+                stats[employee_count].total_overtime_hours = attendance_records[i].overwork_hours;
+
+                switch (attendance_records[i].attendance_status) {
+                case LATE: stats[employee_count].late_count++; break;
+                case LEAVE_EARLY: stats[employee_count].early_count++; break;
+                case WORK_OVERTIME: stats[employee_count].overtime_count++; break;
+                case ASK_FOR_LEAVE: stats[employee_count].leave_count++; break;
+                case ABSENT: stats[employee_count].absent_count++; break;
+                }
+
+                employee_count++;
+            }
+        }
+    }
+
+    if (employee_count == 0) {
+        printf("未找到 %d年%02d月 的考勤记录\n", year, month);
+        return;
+    }
+
+    // 打印报表
+    printf("员工数: %d\n", employee_count);
+    printf("------------------------------------------------------------\n");
+    printf("工号      姓名    出勤天数 迟到 早退 加班天数 请假 缺勤 总工时 总加班\n");
+    printf("------------------------------------------------------------\n");
+
+    for (int i = 0; i < employee_count; i++) {
+        printf("%-10s %-8s %-8d %-4d %-4d %-8d %-4d %-4d %-6.1f %-6.1f\n",
+            stats[i].id,
+            stats[i].name,
+            stats[i].work_days,
+            stats[i].late_count,
+            stats[i].early_count,
+            stats[i].overtime_count,
+            stats[i].leave_count,
+            stats[i].absent_count,
+            stats[i].total_work_hours,
+            stats[i].total_overtime_hours);
+    }
+    printf("------------------------------------------------------------\n");
+}
+
+/**
+ * @brief 处理分析异常考勤
+ */
+void handle_analyze_abnormal() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 异常考勤分析 ---\n");
+
+    // 统计异常考勤
+    int abnormal_count = 0;
+    int late_count = 0;
+    int early_count = 0;
+    int absent_count = 0;
+
+    // 统计每个员工的异常情况
+    struct EmployeeAbnormal {
+        char id[MAX_EMPLOYEE_ID];
+        char name[MAX_EMPLOYEE_ID];
+        int late_count;
+        int early_count;
+        int absent_count;
+    };
+
+    struct EmployeeAbnormal employees[100];
+    int employee_count = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        AttendanceStatus status = attendance_records[i].attendance_status;
+
+        if (status == LATE || status == LEAVE_EARLY || status == ABSENT) {
+            abnormal_count++;
+
+            // 查找员工
+            int found = 0;
+            for (int j = 0; j < employee_count; j++) {
+                if (strcmp(employees[j].id, attendance_records[i].ID) == 0) {
+                    found = 1;
+                    switch (status) {
+                    case LATE: employees[j].late_count++; break;
+                    case LEAVE_EARLY: employees[j].early_count++; break;
+                    case ABSENT: employees[j].absent_count++; break;
+                    }
+                    break;
+                }
+            }
+
+            // 新员工
+            if (!found && employee_count < 100) {
+                strcpy(employees[employee_count].id, attendance_records[i].ID);
+                strcpy(employees[employee_count].name, attendance_records[i].name);
+                employees[employee_count].late_count = 0;
+                employees[employee_count].early_count = 0;
+                employees[employee_count].absent_count = 0;
+
+                switch (status) {
+                case LATE: employees[employee_count].late_count++; break;
+                case LEAVE_EARLY: employees[employee_count].early_count++; break;
+                case ABSENT: employees[employee_count].absent_count++; break;
+                }
+
+                employee_count++;
+            }
+
+            // 全局统计
+            switch (status) {
+            case LATE: late_count++; break;
+            case LEAVE_EARLY: early_count++; break;
+            case ABSENT: absent_count++; break;
+            }
+        }
+    }
+
+    // 显示分析结果
+    printf("总记录数: %d\n", record_count);
+    printf("异常记录数: %d (%.1f%%)\n", abnormal_count,
+        record_count > 0 ? (abnormal_count * 100.0 / record_count) : 0);
+    printf("迟到记录: %d\n", late_count);
+    printf("早退记录: %d\n", early_count);
+    printf("缺勤记录: %d\n", absent_count);
+
+    if (abnormal_count > 0) {
+        printf("\n员工异常情况统计:\n");
+        printf("------------------------------------------------\n");
+        printf("员工ID      姓名      迟到次数 早退次数 缺勤次数\n");
+        printf("------------------------------------------------\n");
+
+        for (int i = 0; i < employee_count; i++) {
+            if (employees[i].late_count > 0 ||
+                employees[i].early_count > 0 ||
+                employees[i].absent_count > 0) {
+                printf("%-10s %-8s %-8d %-8d %-8d\n",
+                    employees[i].id,
+                    employees[i].name,
+                    employees[i].late_count,
+                    employees[i].early_count,
+                    employees[i].absent_count);
+            }
+        }
+        printf("------------------------------------------------\n");
+
+        // 显示异常记录最多的员工
+        int max_abnormal = 0;
+        int max_index = -1;
+        for (int i = 0; i < employee_count; i++) {
+            int total = employees[i].late_count + employees[i].early_count + employees[i].absent_count;
+            if (total > max_abnormal) {
+                max_abnormal = total;
+                max_index = i;
+            }
+        }
+
+        if (max_index >= 0) {
+            printf("\n异常最多的员工: %s (%s)\n",
+                employees[max_index].name, employees[max_index].id);
+            printf("异常次数: %d (迟到:%d, 早退:%d, 缺勤:%d)\n",
+                max_abnormal,
+                employees[max_index].late_count,
+                employees[max_index].early_count,
+                employees[max_index].absent_count);
+        }
+    }
+    else {
+        printf("\n未发现异常考勤记录\n");
+    }
+}
+
+/**
+ * @brief 处理按员工姓名查询（补充函数）
+ */
+void handle_query_by_name() {
+    if (record_count == 0) {
+        printf("暂无考勤记录\n");
+        return;
+    }
+
+    printf("\n--- 按员工姓名查询 ---\n");
+    printf("请输入员工姓名（支持部分匹配）: ");
+
+    char name[MAX_EMPLOYEE_ID];
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = '\0';
+
+    printf("\n查询结果 (姓名包含: %s):\n", name);
+    int found = 0;
+
+    for (int i = 0; i < record_count; i++) {
+        if (strstr(attendance_records[i].name, name) != NULL) {
+            printf("\n记录 #%d:\n", i + 1);
+            printf("员工: %s (%s)\n", attendance_records[i].name, attendance_records[i].ID);
+            printf("日期: %s, 状态: %s\n",
+                attendance_records[i].date,
+                get_status_string(attendance_records[i].attendance_status));
+            printf("上班: %s, 下班: %s\n",
+                attendance_records[i].check_in, attendance_records[i].check_out);
+            found++;
+        }
+    }
+
+    if (found == 0) {
+        printf("未找到姓名包含 %s 的记录\n", name);
+    }
+    else {
+        printf("\n共找到 %d 条记录\n", found);
+    }
+}
+
+
+/**
+ * @brief 处理系统设置
+ */
+void handle_system_settings() {
+    int choice;
+
+    do {
+        clear_screen();
+        printf("\n======== 系统设置 ========\n");
+        printf("1. 更改数据文件路径\n");
+        printf("2. 查看系统信息\n");
+        printf("3. 数据维护\n");
+        printf("4. 关于本系统\n");
+        printf("0. 返回主菜单\n");
+        printf("===========================\n");
+        printf("请选择操作 (0-4): ");
+
+        choice = get_menu_selection(0, 4);
+
+        switch (choice) {
+        case 1:
+            printf("当前数据文件: %s\n", data_filename);
+            printf("新文件路径功能开发中...\n");
+            pause_program();
+            break;
+        case 2:
+            display_system_info();
+            break;
+        case 3:
+            handle_data_maintenance();
+            break;
+        case 4:
+            display_about();
+            break;
+        case 0:
+            printf("返回主菜单\n");
+            break;
+        }
+
+    } while (choice != 0);
+}
+
+/**
+ * @brief 处理考勤记录管理菜单
+ */
+void handle_record_management() {
+    int choice;
+
+    do {
+        printf("\n======== 考勤记录管理 ========\n");
+        printf("1. 添加考勤记录\n");
+        printf("2. 修改考勤记录\n");
+        printf("3. 删除考勤记录\n");
+        printf("4. 查看单条记录\n");
+        printf("5. 返回主菜单\n");
+        printf("===============================\n");
+        printf("请选择操作 (1-5): ");
+
+        choice = get_menu_selection(1, 5);
+
+        switch (choice) {
+        case 1:
+            handle_add_record();
+            break;
+        case 2:
+            handle_modify_record();
+            break;
+        case 3:
+            handle_delete_record();
+            break;
+        case 4:
+            handle_view_record();
+            break;
+        case 5:
+            printf("返回主菜单\n");
+            break;
+        }
+
+        if (choice != 5) {
+            pause_program();
+        }
+
+    } while (choice != 5);
+}
+
+/**
+ * @brief 处理数据查询统计菜单
+ */
+void handle_query_statistics() {
+    int choice;
+
+    do {
+        printf("\n======== 数据查询统计 ========\n");
+        printf("1. 按员工ID查询\n");
+        printf("2. 按员工姓名查询\n");
+        printf("3. 按日期查询\n");
+        printf("4. 按考勤状态查询\n");
+        printf("5. 按时间段查询\n");
+        printf("6. 统计员工考勤情况\n");
+        printf("7. 生成月度报表\n");
+        printf("8. 分析异常考勤\n");
+        printf("9. 返回主菜单\n");
+        printf("===============================\n");
+        printf("请选择操作 (1-9): ");
+
+        choice = get_menu_selection(1, 9);
+
+        switch (choice) {
+        case 1:
+            handle_query_by_id();
+            break;
+        case 2:
+            handle_query_by_name();
+            break;
+        case 3:
+            handle_query_by_date();
+            break;
+        case 4:
+            handle_query_by_status();
+            break;
+        case 5:
+            handle_query_by_time_range();
+            break;
+        case 6:
+            handle_statistics_employee();
+            break;
+        case 7:
+            handle_generate_monthly_report();
+            break;
+        case 8:
+            handle_analyze_abnormal();
+            break;
+        case 9:
+            printf("返回主菜单\n");
+            break;
+        }
+
+        if (choice != 9) {
+            pause_program();
+        }
+
+    } while (choice != 9);
+}
+
+/**
+ * @brief 处理文件操作菜单
+ */
+void handle_file_operations() {
+    int choice;
+
+    do {
+        printf("\n======== 文件操作 ========\n");
+        printf("1. 保存数据到文件\n");
+        printf("2. 从文件加载数据\n");
+        printf("3. 导出到CSV文件\n");
+        printf("4. 从CSV文件导入\n");
+        printf("5. 备份数据文件\n");
+        printf("6. 恢复备份文件\n");
+        printf("7. 清理无效记录\n");
+        printf("8. 返回主菜单\n");
+        printf("===========================\n");
+        printf("请选择操作 (1-8): ");
+
+        choice = get_menu_selection(1, 8);
+
+        switch (choice) {
+        case 1: // 保存数据到文件
+            if (save_attendance_data(attendance_records, record_count, data_filename)) {
+                printf("数据保存成功！\n");
+            }
+            else {
+                printf("数据保存失败！\n");
+            }
+            break;
+        case 2: // 从文件加载数据
+        {
+            int loaded = load_attendance_data(attendance_records, data_filename);
+            if (loaded > 0) {
+                record_count = loaded;
+                printf("数据加载成功，共 %d 条记录\n", record_count);
+            }
+            else {
+                printf("数据加载失败或文件不存在\n");
+            }
+        }
+        break;
+        case 3: // 导出到CSV文件
+        {
+            char csv_filename[100];
+            printf("请输入CSV文件名 (如: data.csv): ");
+            fgets(csv_filename, sizeof(csv_filename), stdin);
+            csv_filename[strcspn(csv_filename, "\n")] = '\0';
+
+            if (export_to_csv(attendance_records, record_count, csv_filename)) {
+                printf("导出成功！\n");
+            }
+            else {
+                printf("导出失败！\n");
+            }
+        }
+        break;
+        case 4: // 从CSV文件导入
+        {
+            char csv_filename[100];
+            printf("请输入CSV文件名: ");
+            fgets(csv_filename, sizeof(csv_filename), stdin);
+            csv_filename[strcspn(csv_filename, "\n")] = '\0';
+
+            int imported = import_from_csv(attendance_records, &record_count, csv_filename);
+            if (imported > 0) {
+                printf("导入成功，新增 %d 条记录\n", imported);
+            }
+            else {
+                printf("导入失败或没有新记录\n");
+            }
+        }
+        break;
+        case 5: // 备份数据文件
+            if (backup_data_file(data_filename)) {
+                printf("备份成功！\n");
+            }
+            else {
+                printf("备份失败！\n");
+            }
+            break;
+        case 6: // 恢复备份文件
+        {
+            char backup_filename[100];
+            printf("请输入备份文件名: ");
+            fgets(backup_filename, sizeof(backup_filename), stdin);
+            backup_filename[strcspn(backup_filename, "\n")] = '\0';
+
+            if (restore_backup_file(backup_filename, data_filename)) {
+                printf("恢复成功！\n");
+                // 重新加载数据
+                record_count = load_attendance_data(attendance_records, data_filename);
+            }
+            else {
+                printf("恢复失败！\n");
+            }
+        }
+        break;
+        case 7: // 清理无效记录
+            clean_invalid_records(attendance_records, &record_count);
+            break;
+        case 8: // 返回主菜单
+            printf("返回主菜单\n");
+            break;
+        }
+
+        if (choice != 8) {
+            pause_program();
+        }
+
+    } while (choice != 8);
+}
+
+// ============ 记录管理相关函数 ============
+
+/**
+ * @brief 处理添加考勤记录
+ * @return 操作结果状态码
+ */
+int handle_add_record(void) {
+    printf("\n=== 添加考勤记录 ===\n");
+
+    // 检查是否达到最大记录数
+    if (record_count >= MAX_RECORDS) {
+        printf("错误: 已达到最大记录数(%d)，无法添加新记录。\n", MAX_RECORDS);
+        return -1;
+    }
+
+    // 输入员工ID（带边界检查）
+    char id[MAX_EMPLOYEE_ID];
+    if (safe_input_string(id, MAX_EMPLOYEE_ID, "请输入员工ID: ") != 0) {
+        printf("员工ID输入失败\n");
+        return -1;
+    }
+
+    if (strlen(id) == 0) {
+        printf("错误: 员工ID不能为空\n");
+        return -1;
+    }
+
+    // 输入员工姓名（带边界检查）
+    char name[MAX_EMPLOYEE_ID];
+    if (safe_input_string(name, MAX_EMPLOYEE_ID, "请输入员工姓名: ") != 0) {
+        printf("员工姓名输入失败\n");
+        return -1;
+    }
+
+    if (strlen(name) == 0) {
+        printf("错误: 员工姓名不能为空\n");
+        return -1;
+    }
+
+    // 输入日期（带验证）
+    char date[11];
+    if (safe_input_date(date, sizeof(date), "请输入日期(格式: YYYY-MM-DD): ") != 0) {
+        printf("日期输入失败\n");
+        return -1;
+    }
+
+    // 输入上班时间（带验证）
+    char check_in[MAX_TIME];
+    if (safe_input_time(check_in, sizeof(check_in), "请输入上班时间(格式: HH:MM): ") != 0) {
+        printf("上班时间输入失败\n");
+        return -1;
+    }
+
+    // 输入下班时间（带验证）
+    char check_out[MAX_TIME];
+    if (safe_input_time(check_out, sizeof(check_out), "请输入下班时间(格式: HH:MM): ") != 0) {
+        printf("下班时间输入失败\n");
+        return -1;
+    }
+
+    // 验证时间顺序
+    int hour_in = (check_in[0] - '0') * 10 + (check_in[1] - '0');
+    int minute_in = (check_in[3] - '0') * 10 + (check_in[4] - '0');
+    int hour_out = (check_out[0] - '0') * 10 + (check_out[1] - '0');
+    int minute_out = (check_out[3] - '0') * 10 + (check_out[4] - '0');
+
+    if (hour_out < hour_in || (hour_out == hour_in && minute_out <= minute_in)) {
+        printf("警告: 下班时间应晚于上班时间\n");
+
+        // 可以选择让用户确认
+        char confirm;
+        printf("是否继续添加? (y/n): ");
+        scanf(" %c", &confirm);
+        getchar();
+
+        if (confirm != 'y' && confirm != 'Y') {
+            printf("已取消添加操作\n");
+            return 0;
+        }
+    }
+
+    // 选择考勤状态（使用安全整数输入）
+    printf("\n请选择考勤状态:\n");
+    printf("0. 正常\n");
+    printf("1. 迟到\n");
+    printf("2. 早退\n");
+    printf("3. 加班\n");
+    printf("4. 出差\n");
+    printf("5. 请假\n");
+    printf("6. 缺勤\n");
+
+    int status_choice = safe_input_int(0, 6, "请选择(0-6): ");
+
+    // 填充记录
+    strcpy(attendance_records[record_count].ID, id);
+    strcpy(attendance_records[record_count].name, name);
+    strcpy(attendance_records[record_count].date, date);
+    strcpy(attendance_records[record_count].check_in, check_in);
+    strcpy(attendance_records[record_count].check_out, check_out);
+    attendance_records[record_count].attendance_status = status_choice;
+
+    // 计算工作时长（简单计算）
+    float work_hours = (hour_out - hour_in) + (minute_out - minute_in) / 60.0f;
+    if (work_hours < 0) {
+        work_hours += 24.0f; // 跨天工作
+    }
+
+    attendance_records[record_count].work_hours = work_hours;
+
+    // 计算加班时长
+    if (status_choice == 3) { // 加班
+        if (work_hours > 8.0f) {
+            attendance_records[record_count].overwork_hours = work_hours - 8.0f;
+        }
+        else {
+            attendance_records[record_count].overwork_hours = 0.0f;
+        }
+    }
+    else {
+        attendance_records[record_count].overwork_hours = 0.0f;
+    }
+
+    // 记录添加的时间戳
+	time_t now = time(NULL);
+	struct tm* t = localtime(&now);
+	strftime(attendance_records[record_count].create_time, sizeof(attendance_records[record_count].create_time), "%Y-%m-%d %H:%M:%S", t);
+
+
+    record_count++; // 增加记录数量
+
+    printf("\n✓ 考勤记录添加成功！\n");
+    printf("当前记录总数: %d\n", record_count);
+
+    return 0;
+}
+
+/**
+ * @brief 处理修改考勤记录
+ * @return 操作结果状态码
+ */
+int handle_modify_record(void) {
+    printf("\n=== 修改考勤记录 ===\n");
+
+    if (record_count == 0) {
+        printf("当前没有考勤记录，无法修改。\n");
+        return -1;
+    }
+
+    // 显示所有记录
+    printf("\n当前所有考勤记录:\n");
+    for (int i = 0; i < record_count; i++) {
+        printf("%d. ID:%s 姓名:%s 日期:%s\n",
+            i + 1,
+            attendance_records[i].ID,
+            attendance_records[i].name,
+            attendance_records[i].date);
+    }
+
+    // 选择记录
+    int index;
+    printf("\n请选择要修改的记录编号(1-%d): ", record_count);
+    scanf("%d", &index);
+    getchar();
+
+    if (index < 1 || index > record_count) {
+        printf("错误: 无效的记录编号！\n");
+        return -1;
+    }
+
+    index--; // 转换为0-based索引
+
+    // 修改员工ID
+    printf("员工ID原值: % s\n ", attendance_records[index].ID);
+    char new_id[MAX_EMPLOYEE_ID];
+    if (safe_input_string(new_id, MAX_EMPLOYEE_ID,"请输入新的员工ID：") == 0) {
+        strcpy(attendance_records[index].ID, new_id);
+    }
+
+    // 修改员工姓名
+    printf("员工姓名原值:%s\n ", attendance_records[index].name);
+    char new_name[MAX_EMPLOYEE_ID];
+    if (safe_input_string(new_name, MAX_EMPLOYEE_ID,"请输入新的员工姓名：") == 0) {
+        strcpy(attendance_records[index].name, new_name);
+    }
+
+    // 修改日期
+    printf("原值:%s\n ", attendance_records[index].date);
+    char new_date[11];
+    if (safe_input_date(new_date, MAX_EMPLOYEE_ID, "请输入日期(格式: YYYY-MM-DD): ") == 0) {
+        strcpy(attendance_records[index].date, new_id);
+    }
+
+    // 修改考勤状态
+    printf("输入新的考勤状态(0-6): ");
+    int new_status;
+    scanf("%d", &new_status);
+    getchar();
+    attendance_records[index].attendance_status = new_status;
+
+	//修改上班时间
+    printf("原值:%s\n ", attendance_records[index].check_in);
+    char new_check_in[MAX_TIME];
+    if (safe_input_time(new_check_in, MAX_TIME, "请输入上班时间(格式: HH:MM): ") == 0) {
+        strcpy(attendance_records[index].check_in, new_check_in);
+	}
+
+	//修改下班时间
+    printf("原值:%s\n ", attendance_records[index].check_out);
+    char new_check_out[MAX_TIME];
+    if (safe_input_time(new_check_out, MAX_TIME, "请输入下班时间(格式: HH:MM): ") == 0) {
+        strcpy(attendance_records[index].check_out, new_check_out);
+	}
+
+	//重新计算工作时长（简单计算）
+    int hour_in = (attendance_records[index].check_in[0] - '0') * 10 + (attendance_records[index].check_in[1] - '0');
+    int minute_in = (attendance_records[index].check_in[3] - '0') * 10 + (attendance_records[index].check_in[4] - '0');
+    int hour_out = (attendance_records[index].check_out[0] - '0') * 10 + (attendance_records[index].check_out[1] - '0');
+    int minute_out = (attendance_records[index].check_out[3] - '0') * 10 + (attendance_records[index].check_out[4] - '0');
+    float work_hours = (hour_out - hour_in) + (minute_out - minute_in) / 60.0f;
+    if (work_hours < 0) {
+        work_hours += 24.0f; // 跨天工作
+    }
+    attendance_records[index].work_hours = work_hours;
+   
+    //重新计算加班时长
+    if (attendance_records[index].attendance_status == 3) { // 加班
+        if (work_hours > 8.0f) {
+            attendance_records[index].overwork_hours = work_hours - 8.0f;
+        }
+        else {
+            attendance_records[index].overwork_hours = 0.0f;
+        }
+    }
+    else {
+        attendance_records[index].overwork_hours = 0.0f;
+	}
+
+	//修改创建时间
+	time_t now = time(NULL);
+	struct tm* t = localtime(&now);
+	strftime(attendance_records[index].create_time, sizeof(attendance_records[index].create_time), "%Y-%m-%d %H:%M:%S", t);
+
+    printf("\n考勤记录修改成功！\n");
+
+    return 0;
+}
+
+/**
+ * @brief 处理删除考勤记录
+ * @return 操作结果状态码
+ */
+int handle_delete_record(void) {
+    printf("\n=== 删除考勤记录 ===\n");
+
+    if (record_count == 0) {
+        printf("当前没有考勤记录，无法删除。\n");
+        return -1;
+    }
+
+    // 显示所有记录
+    printf("\n当前所有考勤记录:\n");
+    for (int i = 0; i < record_count; i++) {
+        printf("%d. ID:%s 姓名:%s 日期:%s\n",
+            i + 1,
+            attendance_records[i].ID,
+            attendance_records[i].name,
+            attendance_records[i].date);
+    }
+
+    // 选择记录
+    int index;
+    printf("\n请选择要删除的记录编号(1-%d): ", record_count);
+    scanf("%d", &index);
+    getchar();
+
+    if (index < 1 || index > record_count) {
+        printf("错误: 无效的记录编号！\n");
+        return -1;
+    }
+
+    index--; // 转换为0-based索引
+
+    // 确认删除
+    printf("确认删除记录: ID:%s 姓名:%s 日期:%s? (y/n): ",
+        attendance_records[index].ID,
+        attendance_records[index].name,
+        attendance_records[index].date);
+    char confirm;
+    scanf("%c", &confirm);
+    getchar();
+
+    if (confirm == 'y' || confirm == 'Y') {
+        // 移动记录
+        for (int i = index; i < record_count - 1; i++) {
+            attendance_records[i] = attendance_records[i + 1];
+        }
+        record_count--; // 减少记录数量
+
+        printf("\n考勤记录删除成功！\n");
+        printf("当前记录总数: %d\n", record_count);
+    }
+    else {
+        printf("已取消删除操作。\n");
+    }
+
+    return 0;
+}
+
+/**
+ * @brief 处理查看考勤记录
+ * @return 操作结果状态码
+ */
+int handle_view_record(void) {
+    printf("\n=== 查看考勤记录 ===\n");
+
+    if (record_count == 0) {
+        printf("当前没有考勤记录。\n");
+        return 0;
+    }
+
+    printf("\n当前所有考勤记录(%d条):\n", record_count);
+    printf("========================================\n");
+
+    for (int i = 0; i < record_count; i++) {
+        printf("记录 %d:\n", i + 1);
+		printf("创建时间: %s\n", attendance_records[i].create_time);
+        printf("  员工ID: %s\n", attendance_records[i].ID);
+        printf("  员工姓名: %s\n", attendance_records[i].name);
+        printf("  日期: %s\n", attendance_records[i].date);
+        printf("  上班时间: %s\n", attendance_records[i].check_in);
+        printf("  下班时间: %s\n", attendance_records[i].check_out);
+        printf("  考勤状态: %d\n", attendance_records[i].attendance_status);
+        printf("  工作时长: %.1f小时\n", attendance_records[i].work_hours);
+        printf("  加班时长: %.1f小时\n", attendance_records[i].overwork_hours);
+        printf("----------------------------------------\n");
+    }
+
+    return 0;
+}
+
+/**
+ * @brief 处理按ID查询考勤记录
+ * @return 操作结果状态码
+ */
+int handle_query_by_id(void) {
+    printf("\n=== 按员工ID查询 ===\n");
+
+    if (record_count == 0) {
+        printf("当前没有考勤记录。\n");
+        return 0;
+    }
+
+    char query_id[MAX_EMPLOYEE_ID];
+    printf("请输入要查询的员工ID: ");
+    scanf("%s", query_id);
+    getchar();
+
+    int found = 0;
+
+    printf("\n查询结果:\n");
+    printf("========================================\n");
+
+    for (int i = 0; i < record_count; i++) {
+        if (strcmp(attendance_records[i].ID, query_id) == 0) {
+            printf("记录 %d:\n", ++found);
+			printf("记录创建时间: %s\n", attendance_records[i].create_time);
+            printf("  员工姓名: %s\n", attendance_records[i].name);
+            printf("  日期: %s\n", attendance_records[i].date);
+            printf("  上班时间: %s\n", attendance_records[i].check_in);
+            printf("  下班时间: %s\n", attendance_records[i].check_out);
+            printf("  考勤状态: %d\n", attendance_records[i].attendance_status);
+            printf("  工作时长: %.1f小时\n", attendance_records[i].work_hours);
+            printf("----------------------------------------\n");
+        }
+    }
+
+    if (found == 0) {
+        printf("未找到员工ID为 %s 的记录。\n", query_id);
+    }
+    else {
+        printf("共找到 %d 条记录。\n", found);
+    }
+
+    return 0;
+}

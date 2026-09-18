@@ -1,0 +1,380 @@
+﻿/**
+ * @file data_manager.c
+ * @brief 数据管理模块
+ * @details 负责考勤数据的核心管理功能，包括增删改查、排序、统计等
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "structures.h"
+#include "utils.h"
+
+ /**
+  * @brief 初始化考勤记录数组
+  * @param records 考勤记录数组指针
+  * @param count 记录数量指针
+  * @details 清空所有记录，重置计数器
+  */
+void init_attendance_data(AttendanceRecord records[], int* count) {
+    for (int i = 0; i < MAX_RECORDS; i++) {
+        memset(&records[i], 0, sizeof(AttendanceRecord));
+    }
+    *count = 0;
+    printf("考勤数据已初始化\n");
+}
+
+/**
+ * @brief 添加考勤记录
+ * @param records 考勤记录数组
+ * @param count 记录数量指针
+ * @param new_record 新记录指针
+ * @return 添加成功返回1，失败返回0
+ * @details 检查记录数量限制，验证数据有效性
+ */
+int add_attendance_record(AttendanceRecord records[], int* count, const AttendanceRecord* new_record) {
+    // 检查记录数量是否达到上限
+    if (*count >= MAX_RECORDS) {
+        printf("错误：记录数量已达到上限（%d条）\n", MAX_RECORDS);
+        return 0;
+    }
+
+    // 验证必要字段
+    if (strlen(new_record->ID) == 0 || strlen(new_record->name) == 0 || strlen(new_record->date) == 0) {
+        printf("错误：员工ID、姓名或日期不能为空\n");
+        return 0;
+    }
+
+    // 添加记录到数组
+    records[*count] = *new_record;
+    (*count)++;
+
+    printf("考勤记录添加成功（当前记录数：%d）\n", *count);
+    return 1;
+}
+
+/**
+ * @brief 根据索引删除考勤记录
+ * @param records 考勤记录数组
+ * @param count 记录数量指针
+ * @param index 要删除的记录索引
+ * @return 删除成功返回1，失败返回0
+ * @details 通过移动数组元素实现删除，保持数据连续性
+ */
+int delete_record_by_index(AttendanceRecord records[], int* count, int index) {
+    // 验证索引有效性
+    if (index < 0 || index >= *count) {
+        printf("错误：无效的记录索引\n");
+        return 0;
+    }
+
+    // 显示要删除的记录信息
+    printf("确认删除以下记录？\n");
+    printf("员工：%s (%s)，日期：%s\n",
+        records[index].name, records[index].ID, records[index].date);
+    printf("考勤状态：%s\n", get_status_string(records[index].attendance_status));
+
+    printf("请输入 'yes' 确认删除：");
+    char confirm[10];
+    scanf("%s", confirm);
+
+    if (strcmp(confirm, "yes") != 0 && strcmp(confirm, "YES") != 0) {
+        printf("删除操作已取消\n");
+        return 0;
+    }
+
+    // 删除记录（将后续记录前移）
+    for (int i = index; i < *count - 1; i++) {
+        records[i] = records[i + 1];
+    }
+
+    (*count)--;
+    printf("记录删除成功（剩余记录数：%d）\n", *count);
+    return 1;
+}
+
+/**
+ * @brief 根据员工ID和日期查找记录索引
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param employee_id 员工ID
+ * @param date 考勤日期
+ * @return 找到返回索引，未找到返回-1
+ * @details 用于定位特定员工在特定日期的记录
+ */
+int find_record_index(AttendanceRecord records[], int count, const char* employee_id, const char* date) {
+    for (int i = 0; i < count; i++) {
+        if (strcmp(records[i].ID, employee_id) == 0 &&
+            strcmp(records[i].date, date) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * @brief 修改考勤记录
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param index 要修改的记录索引
+ * @param updated_record 更新后的记录指针
+ * @return 修改成功返回1，失败返回0
+ * @details 允许修改记录的各个字段，创建时间保持不变
+ */
+int modify_attendance_record(AttendanceRecord records[], int count, int index,
+    const AttendanceRecord* updated_record) {
+    // 验证索引有效性
+    if (index < 0 || index >= count) {
+        printf("错误：无效的记录索引\n");
+        return 0;
+    }
+
+    // 保存原始创建时间
+    char original_create_time[20];
+    strcpy(original_create_time, records[index].create_time);
+
+    // 更新记录
+    records[index] = *updated_record;
+
+    // 恢复原始创建时间
+    strcpy(records[index].create_time, original_create_time);
+
+    printf("考勤记录修改成功\n");
+    return 1;
+}
+
+/**
+ * @brief 统计指定员工的考勤情况
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param employee_id 员工ID
+ * @details 统计员工的出勤天数、迟到早退次数等
+ */
+void calculate_employee_statistics(AttendanceRecord records[], int count, const char* employee_id) {
+    int total_days = 0;
+    int normal_days = 0;
+    int late_days = 0;
+    int early_days = 0;
+    int overtime_days = 0;
+    int leave_days = 0;
+    int absent_days = 0;
+    int evection_days = 0;
+    float total_work_hours = 0.0;
+    float total_overtime_hours = 0.0;
+
+    // 遍历记录进行统计
+    for (int i = 0; i < count; i++) {
+        if (strcmp(records[i].ID, employee_id) == 0) {
+            total_days++;
+            total_work_hours += records[i].work_hours;
+            total_overtime_hours += records[i].overwork_hours;
+
+            switch (records[i].attendance_status) {
+            case NORMAL: normal_days++; break;
+            case LATE: late_days++; break;
+            case LEAVE_EARLY: early_days++; break;
+            case WORK_OVERTIME: overtime_days++; break;
+            case EVECTION: evection_days++; break;
+            case ASK_FOR_LEAVE: leave_days++; break;
+            case ABSENT: absent_days++; break;
+            }
+        }
+    }
+
+    // 显示统计结果
+    printf("\n=== 员工 %s 考勤统计 ===\n", employee_id);
+    printf("统计天数：%d\n", total_days);
+    printf("正常出勤：%d 天 (%.1f%%)\n", normal_days,
+        total_days > 0 ? (normal_days * 100.0 / total_days) : 0);
+    printf("迟到：%d 次\n", late_days);
+    printf("早退：%d 次\n", early_days);
+    printf("加班：%d 天\n", overtime_days);
+    printf("出差：%d 天\n", evection_days);
+    printf("请假：%d 天\n", leave_days);
+    printf("缺勤：%d 天\n", absent_days);
+    printf("总工作时间：%.2f 小时\n", total_work_hours);
+    printf("总加班时间：%.2f 小时\n", total_overtime_hours);
+    printf("平均每日工作：%.2f 小时\n",
+        total_days > 0 ? total_work_hours / total_days : 0);
+}
+
+/**
+ * @brief 按员工ID排序记录
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param ascending 排序方向（1升序，0降序）
+ * @details 使用冒泡排序算法按员工ID排序
+ */
+void sort_records_by_id(AttendanceRecord records[], int count, int ascending) {
+    if (count <= 1) return;
+
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            int should_swap = 0;
+            int cmp = strcmp(records[j].ID, records[j + 1].ID);
+
+            if (ascending) {
+                should_swap = (cmp > 0);
+            }
+            else {
+                should_swap = (cmp < 0);
+            }
+
+            if (should_swap) {
+                // 交换记录
+                AttendanceRecord temp = records[j];
+                records[j] = records[j + 1];
+                records[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("记录已按员工ID%s排序\n", ascending ? "升序" : "降序");
+}
+
+/**
+ * @brief 按日期排序记录
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param ascending 排序方向（1升序，0降序）
+ */
+void sort_records_by_date(AttendanceRecord records[], int count, int ascending) {
+    if (count <= 1) return;
+
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            int should_swap = 0;
+            int cmp = strcmp(records[j].date, records[j + 1].date);
+
+            if (ascending) {
+                should_swap = (cmp > 0);
+            }
+            else {
+                should_swap = (cmp < 0);
+            }
+
+            if (should_swap) {
+                // 交换记录
+                AttendanceRecord temp = records[j];
+                records[j] = records[j + 1];
+                records[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("记录已按日期%s排序\n", ascending ? "升序" : "降序");
+}
+
+/**
+ * @brief 按工作时间排序记录
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @param ascending 排序方向（1升序，0降序）
+ */
+void sort_records_by_work_hours(AttendanceRecord records[], int count, int ascending) {
+    if (count <= 1) return;
+
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            int should_swap = 0;
+
+            if (ascending) {
+                should_swap = (records[j].work_hours > records[j + 1].work_hours);
+            }
+            else {
+                should_swap = (records[j].work_hours < records[j + 1].work_hours);
+            }
+
+            if (should_swap) {
+                // 交换记录
+                AttendanceRecord temp = records[j];
+                records[j] = records[j + 1];
+                records[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("记录已按工作时间%s排序\n", ascending ? "升序" : "降序");
+}
+
+/**
+ * @brief 查找重复记录
+ * @param records 考勤记录数组
+ * @param count 记录数量
+ * @details 查找相同员工在同一天的多条记录
+ */
+void find_duplicate_records(AttendanceRecord records[], int count) {
+    int duplicate_count = 0;
+
+    printf("\n=== 重复记录检查 ===\n");
+
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = i + 1; j < count; j++) {
+            if (strcmp(records[i].ID, records[j].ID) == 0 &&
+                strcmp(records[i].date, records[j].date) == 0) {
+                duplicate_count++;
+                printf("\n发现重复记录 #%d：\n", duplicate_count);
+                printf("员工：%s (%s)，日期：%s\n",
+                    records[i].name, records[i].ID, records[i].date);
+                printf("记录 %d：状态=%s，上班=%s，下班=%s\n",
+                    i + 1, get_status_string(records[i].attendance_status),
+                    records[i].check_in, records[i].check_out);
+                printf("记录 %d：状态=%s，上班=%s，下班=%s\n",
+                    j + 1, get_status_string(records[j].attendance_status),
+                    records[j].check_in, records[j].check_out);
+            }
+        }
+    }
+
+    if (duplicate_count == 0) {
+        printf("未发现重复记录\n");
+    }
+    else {
+        printf("\n共发现 %d 组重复记录\n", duplicate_count);
+    }
+}
+
+/**
+ * @brief 清理无效记录
+ * @param records 考勤记录数组
+ * @param count 记录数量指针
+ * @details 删除员工ID为空或格式错误的记录
+ */
+void clean_invalid_records(AttendanceRecord records[], int* count) {
+    int original_count = *count;
+    int valid_count = 0;
+
+    for (int i = 0; i < original_count; i++) {
+        // 检查记录有效性
+        int is_valid = 1;
+
+        // 检查必要字段
+        if (strlen(records[i].ID) == 0 ||
+            strlen(records[i].name) == 0 ||
+            strlen(records[i].date) == 0) {
+            is_valid = 0;
+        }
+
+        // 检查日期格式
+        if (strlen(records[i].date) != 10 ||
+            records[i].date[4] != '-' || records[i].date[7] != '-') {
+            is_valid = 0;
+        }
+
+        if (is_valid) {
+            // 保留有效记录
+            if (valid_count != i) {
+                records[valid_count] = records[i];
+            }
+            valid_count++;
+        }
+        else {
+            printf("删除无效记录：员工=%s，日期=%s\n",
+                records[i].ID, records[i].date);
+        }
+    }
+
+    *count = valid_count;
+    printf("记录清理完成，删除 %d 条无效记录\n", original_count - valid_count);
+}
